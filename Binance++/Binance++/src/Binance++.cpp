@@ -10,7 +10,7 @@ namespace binance
 	{
 		CURLcode ec = curl_global_init(CURL_GLOBAL_DEFAULT);
 		if (ec != CURLE_OK)
-			throw std::exception(CombineCurlErr("Failed to init curl: ", ec).c_str());
+			throw std::exception((std::string("Failed to init curl: ") + curl_easy_strerror(ec)).c_str());
 	}
 
 	void CleanupLibrary()
@@ -41,7 +41,7 @@ namespace binance
 	// GET /sapi/v1/system/status
 	bool Binance::GetSystemStatus(nlohmann::json& res)
 	{
-		std::string url(Binance_Host);
+		std::string url(Spot_Host);
 		url += "/sapi/v1/system/status";
 
 		return CurlApi(url, res);
@@ -50,7 +50,7 @@ namespace binance
 	// GET /sapi/v1/capital/config/getall
 	bool Binance::GetAllCoinInfo(long recvWindow, nlohmann::json& res)
 	{
-		std::string url(Binance_Host);
+		std::string url(Spot_Host);
 		url += "/sapi/v1/capital/config/getall";
 
 		Query query;
@@ -78,7 +78,7 @@ namespace binance
 		nlohmann::json& res
 	)
 	{
-		std::string url(Binance_Host);
+		std::string url(Spot_Host);
 		url += "/sapi/v1/accountSnapshot";
 
 		Query query;
@@ -102,6 +102,38 @@ namespace binance
 
 		return CurlApi(url, res, "GET", headerData);
 	}
+
+
+	// GET /fapi/v1/continuousKlines
+	bool Binance::GetContinousContractKlineData(
+		std::string pair,
+		std::string contractType,
+		std::string interval,
+		long startTime,
+		long endTime,
+		int limit,
+		nlohmann::json& res
+	)
+	{
+		std::string url(Futures_Host);
+		url += "/fapi/v1/continuousKlines";
+
+		Query query;
+
+		query.AppendQuery("pair", pair);
+		query.AppendQuery("contractType", contractType);
+		query.AppendQuery("interval", interval);
+		if (startTime > 0)
+			query.AppendQuery("startTime", startTime);
+		if (endTime > 0)
+			query.AppendQuery("endTime", endTime);
+		if (limit > 0)
+			query.AppendQuery("limit", limit);
+
+		url.append(query.GetString());
+
+		return CurlApi(url, res);
+	}
 #pragma endregion
 
 
@@ -109,6 +141,10 @@ namespace binance
 	std::string Binance::GetErrorMessage()
 	{
 		return errorMessage;
+	}
+	std::string Binance::GetLastURLRequest()
+	{
+		return lastURLRequest;
 	}
 
 
@@ -118,7 +154,7 @@ namespace binance
 		return false;
 	}
 
-	std::string CombineCurlErr(std::string msg, CURLcode ec)
+	std::string Binance::CombineCurlErr(std::string msg, CURLcode ec)
 	{
 		return (msg + curl_easy_strerror(ec));
 	}
@@ -134,6 +170,13 @@ namespace binance
 
 	bool Binance::CurlApi(std::string url, nlohmann::json& json, std::string action, std::vector<std::string> extraHeaderData, std::string postData)
 	{
+		if (timeout)
+		{
+			if (std::chrono::steady_clock::now() < (timeoutPoint + std::chrono::seconds(70)))
+				return ReturnError("Currently in timeout.");
+			timeout = false;
+		}
+
 		CURLcode cec;
 		std::string requestResult;
 
@@ -143,6 +186,7 @@ namespace binance
 		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
 		curl_easy_setopt(curl, CURLOPT_ENCODING, "gzip");
 
+		extraHeaderData.push_back("Accept-Encoding: application/gzip");
 		if (extraHeaderData.size() > 0)
 		{
 			curl_slist* chunk = nullptr;
@@ -159,14 +203,41 @@ namespace binance
 		}
 
 		cec = curl_easy_perform(curl);
+		lastURLRequest = url;
+
+		long httpCode = 0;
+		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
 
 		if (cec != CURLE_OK)
 			return ReturnError(CombineCurlErr("Failed to perform request to API endpoint: ", cec));
 
+		if (httpCode == 403)
+			return ReturnError("Received HTTP 403 error code. Web Application Firewall has been violated.");
+
+		if (httpCode == 429)
+		{
+			timeout = true;
+			timeoutPoint = std::chrono::steady_clock::now();
+			return ReturnError("Received HTTP 429 error code. Request Limit Rate hit. 1 minute 10 second timeout proceeding.");
+		}
+
+		if (httpCode == 404)
+			return ReturnError("Recieved HTTP 404 erorr code. Page not found (invalid URL).");
+
+		if (httpCode == 418)
+			return ReturnError("Recieved HTTP 418 error code. IP has been banned for malicious API use.");
+
 		if (requestResult.size() == 0)
 			return ReturnError("No return data from API request");
 
-		json.parse(requestResult);
+		try
+		{
+			json = json.parse(requestResult);
+		}
+		catch (nlohmann::json::exception& e)
+		{
+			return ReturnError("Failed to parse JSON:\n" + requestResult + "\n" + std::string(e.what()));
+		}
 
 		return true;
 	}

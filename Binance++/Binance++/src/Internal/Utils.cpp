@@ -16,7 +16,7 @@ namespace binance
 			hexString += Hex_Codes[(binValue >> 4) & 0x0F];
 			hexString += Hex_Codes[binValue & 0x0F];
 		}
-		return HexString;
+		return hexString;
 	}
 
 	void SignQuery(Query& query, std::string secretKey)
@@ -40,6 +40,6 @@ namespace binance
 
 	long GetMsEpoch()
 	{
-		return std::chrono::system_clock::now().time_since_epoch() / 1ms;
+		return std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
 	}
 }
