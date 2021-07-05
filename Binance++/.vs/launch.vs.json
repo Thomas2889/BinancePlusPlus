@@ -1,0 +1,13 @@
+{
+  "version": "0.2.1",
+  "defaults": {},
+  "configurations": [
+    {
+      "type": "default",
+      "name": "Binance++",
+      "project": "CMakeLists.txt",
+      "projectTarget": "",
+      "currentDir": "${workspaceRoot}/#wd"
+    }
+  ]
+}

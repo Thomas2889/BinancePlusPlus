@@ -1,0 +1,5 @@
+/Binance++/##out/
+/Binance++/#wd/log.txt
+
+/Binance++/.vs/*
+!/Binance++/.vs/launch.vs.json

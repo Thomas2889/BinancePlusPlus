@@ -1,0 +1,6 @@
+﻿#include "Binance++.h"
+
+int main()
+{
+	return 0;
+}
