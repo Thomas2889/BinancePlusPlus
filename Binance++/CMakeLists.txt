@@ -17,3 +17,4 @@ endif()
 
 
 add_subdirectory ("Binance++")
+add_subdirectory ("DevTest")

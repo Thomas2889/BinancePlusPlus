@@ -4,7 +4,7 @@
   "configurations": [
     {
       "type": "default",
-      "name": "Binance++",
+      "name": "DevTest",
       "project": "CMakeLists.txt",
       "projectTarget": "",
       "currentDir": "${workspaceRoot}/#wd"

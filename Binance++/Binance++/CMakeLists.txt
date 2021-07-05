@@ -4,13 +4,14 @@ set(libname Binance++)
 
 add_library (${libname}
 	"src/Binance++.cpp"
-)
+	 "src/Internal/Utils.h" "src/Internal/Query.h")
 
 target_include_directories (${libname} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/#in/Include")
 target_include_directories (${libname} PRIVATE "${CMAKE_SOURCE_DIR}/#in/Include")
 
 target_link_libraries(${libname}
 	PRIVATE "${CMAKE_SOURCE_DIR}/#in/Lib/${CMAKE_OS_NAME}/${CMAKE_PLATFORM_NAME}-${CMAKE_BUILD_TYPE}/CppLog.lib"
+	PRIVATE "${CMAKE_SOURCE_DIR}/#in/Lib/${CMAKE_OS_NAME}/${CMAKE_PLATFORM_NAME}-${CMAKE_BUILD_TYPE}/libcurl_imp.lib"
 	)
 
 
