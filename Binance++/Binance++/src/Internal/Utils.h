@@ -11,5 +11,5 @@ namespace binance
 	void SignQuery(Query& query, std::string secretKey);
 	void AddApiKey(std::vector<std::string>& headerData, std::string apiKey);
 
-	long GetMsEpoch();
+	int64_t GetMsEpoch();
 }

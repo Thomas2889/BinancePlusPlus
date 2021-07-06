@@ -38,7 +38,7 @@ namespace binance
 	}
 
 
-	long GetMsEpoch()
+	int64_t GetMsEpoch()
 	{
 		return std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
 	}
