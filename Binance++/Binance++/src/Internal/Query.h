@@ -27,7 +27,7 @@ namespace binance
 				queryString.append("&");
 			queryString.append(queryName).append("=").append(value);
 		}
-		void AppendQuery(std::string queryName, long value)
+		void AppendQuery(std::string queryName, int64_t value)
 		{
 			AppendQuery(queryName, std::to_string(value));
 		}

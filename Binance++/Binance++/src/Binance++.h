@@ -36,13 +36,13 @@ namespace binance
 
 
 		bool GetSystemStatus(nlohmann::json& res);
-		bool GetAllCoinInfo(long recvWindow, nlohmann::json& res);
+		bool GetAllCoinInfo(int64_t recvWindow, nlohmann::json& res);
 		bool GetDailyAccountSnapshot(
 			std::string type,
-			long startTime,
-			long endTime,
+			int64_t startTime,
+			int64_t endTime,
 			int limit,
-			long recvWindow,
+			int64_t recvWindow,
 			nlohmann::json& res
 		);
 
@@ -50,8 +50,8 @@ namespace binance
 			std::string pair,
 			std::string contractType,
 			std::string interval,
-			long startTime,
-			long endTime,
+			int64_t startTime,
+			int64_t endTime,
 			int limit,
 			nlohmann::json& res
 		);

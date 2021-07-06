@@ -48,7 +48,7 @@ namespace binance
 	}
 
 	// GET /sapi/v1/capital/config/getall
-	bool Binance::GetAllCoinInfo(long recvWindow, nlohmann::json& res)
+	bool Binance::GetAllCoinInfo(int64_t recvWindow, nlohmann::json& res)
 	{
 		std::string url(Spot_Host);
 		url += "/sapi/v1/capital/config/getall";
@@ -71,10 +71,10 @@ namespace binance
 	// GET /sapi/v1/accountSnapshot
 	bool Binance::GetDailyAccountSnapshot(
 		std::string type,
-		long startTime,
-		long endTime,
+		int64_t startTime,
+		int64_t endTime,
 		int limit,
-		long recvWindow,
+		int64_t recvWindow,
 		nlohmann::json& res
 	)
 	{
@@ -109,8 +109,8 @@ namespace binance
 		std::string pair,
 		std::string contractType,
 		std::string interval,
-		long startTime,
-		long endTime,
+		int64_t startTime,
+		int64_t endTime,
 		int limit,
 		nlohmann::json& res
 	)
